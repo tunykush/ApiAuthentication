@@ -29,22 +29,7 @@ type Paper = {
 };
 
 const initialPapers: Paper[] = [
-  {
-    id: 1,
-    code: 'UNKNOWN',
-    name: 'Untitled Paper',
-    status: 'success',
-    marks: 0,
-    uploaded: '2026-04-02',
-  },
-  {
-    id: 2,
-    code: '--',
-    name: 'draft',
-    status: 'success',
-    marks: 0,
-    uploaded: '2026-04-02',
-  },
+
 ];
 
 function CircleProgress({ progress }: { progress: number }) {
@@ -97,7 +82,7 @@ export default function AutoGradeUploadPage() {
 
   const today = () => new Date().toISOString().split('T')[0];
 
-  const simulateUpload = React.useCallback((newFiles: File[]) => {
+  const simulateUpload = React.useCallback(async (newFiles: File[]) => {
     const mappedFiles: UploadFile[] = newFiles.map((file, index) => ({
       id: Date.now() + index,
       file,
@@ -107,48 +92,76 @@ export default function AutoGradeUploadPage() {
 
     setFiles((prev) => [...mappedFiles, ...prev]);
 
-    mappedFiles.forEach((uploadFile) => {
+    for (const uploadFile of mappedFiles) {
       let progress = 0;
 
-      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 18) + 10;
-
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-
-          setFiles((prev) =>
-            prev.map((item) =>
-              item.id === uploadFile.id
-                ? { ...item, progress: 100, uploaded: true }
-                : item
-            )
-          );
-
-          const extension = uploadFile.file.name.split('.').pop()?.toUpperCase() || 'FILE';
-
-          setPapers((prev) => [
-            {
-              id: uploadFile.id,
-              code: extension,
-              name: uploadFile.file.name,
-              status: 'success',
-              marks: 0,
-              uploaded: today(),
-            },
-            ...prev,
-          ]);
-
-          return;
-        }
+      const fakeInterval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 5;
 
         setFiles((prev) =>
           prev.map((item) =>
-            item.id === uploadFile.id ? { ...item, progress } : item
+            item.id === uploadFile.id
+              ? { ...item, progress: Math.min(progress, 90) }
+              : item
           )
         );
-      }, 180);
-    });
+      }, 200);
+
+      try {
+        const fd = new FormData();
+        fd.append('file', uploadFile.file);
+        fd.append('exam_id', '1');
+        fd.append('notes', 'upload from web');
+
+        const res = await fetch('/api/upload-paper', {
+          method: 'POST',
+          body: fd,
+        });
+
+        clearInterval(fakeInterval);
+        console.log('res :>> ', res);
+        if (!res.ok) throw new Error('Upload failed');
+
+        const data = await res.json();
+
+        if (!data || data.error) throw new Error('API error');
+
+        setFiles((prev) =>
+          prev.map((item) =>
+            item.id === uploadFile.id
+              ? { ...item, progress: 100, uploaded: true }
+              : item
+          )
+        );
+
+        const extension =
+          uploadFile.file.name.split('.').pop()?.toUpperCase() || 'FILE';
+
+        setPapers((prev) => [
+        {
+          id: uploadFile.id,
+          code: extension,
+          name: uploadFile.file.name,
+          status: 'success',
+          marks: data?.result || 'Done',
+          uploaded: today(),
+        },
+        ...prev,
+      ]);
+
+      } catch (err) {
+        clearInterval(fakeInterval);
+        setFiles((prev) =>
+          prev.map((item) =>
+            item.id === uploadFile.id
+              ? { ...item, progress: 0, uploaded: false }
+              : item
+          )
+        );
+
+        console.error('Upload failed:', err);
+      }
+    }
   }, []);
 
   const handleFiles = React.useCallback(
@@ -171,27 +184,6 @@ export default function AutoGradeUploadPage() {
   return (
     <main className="min-h-screen bg-[#f6f7f9] px-4 py-8 text-slate-900 md:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-6 flex items-center justify-between border-b border-slate-200 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#111111] text-white">
-              <FileText className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-[28px] font-semibold leading-none tracking-tight text-slate-900">
-                AutoGrade
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">Question Handler</p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:bg-slate-50 active:bg-slate-100"
-          >
-            <Lightbulb className="h-4 w-4" />
-            Helpful Tips
-          </button>
-        </header>
 
         <section className="rounded-[24px] bg-transparent p-4 md:p-6">
           <label
@@ -246,7 +238,7 @@ export default function AutoGradeUploadPage() {
                 id="paper-upload"
                 ref={inputRef}
                 type="file"
-                multiple
+                
                 accept=".pdf,.doc,.docx"
                 className="hidden"
                 onChange={(e) => handleFiles(e.target.files)}
@@ -295,12 +287,12 @@ export default function AutoGradeUploadPage() {
         </section>
 
         <section className="mt-7 overflow-hidden rounded-[24px] border border-slate-200 bg-white">
-          <div className="flex items-center justify-between px-5 py-4 md:px-6">
+          <div className="flex items-center justify-between px-5 py-4 md:px-6 bg-black text-white">
             <div>
-              <h3 className="text-[22px] font-semibold tracking-tight text-slate-900">
+              <h3 className="text-[22px] font-semibold tracking-tight text-white">
                 Your Papers
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-white">
                 {totalPapers} files uploaded · {successCount} processed
               </p>
             </div>
@@ -373,19 +365,6 @@ export default function AutoGradeUploadPage() {
           </div>
         </section>
       </div>
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </main>
   );
 }

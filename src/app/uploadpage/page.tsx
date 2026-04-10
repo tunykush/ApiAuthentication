@@ -7,7 +7,6 @@ import {
   FileText,
   Eye,
   Trash2,
-  Lightbulb,
   CheckCircle2,
   Clock3,
 } from 'lucide-react';
@@ -20,17 +19,13 @@ type UploadFile = {
 };
 
 type Paper = {
-  id: number;
-  code: string;
-  name: string;
-  status: 'success' | 'processing';
-  marks: number | string;
-  uploaded: string;
+  paper_id: number;
+  validation_status: string;
+  is_finalized?: boolean;
+  total_marks?: number;
+  message?: string;
+  created_at?: string;
 };
-
-const initialPapers: Paper[] = [
-
-];
 
 function CircleProgress({ progress }: { progress: number }) {
   const radius = 18;
@@ -64,105 +59,138 @@ function CircleProgress({ progress }: { progress: number }) {
 }
 
 export default function AutoGradeUploadPage() {
-  const [papers, setPapers] = React.useState<Paper[]>(initialPapers);
+  const [papers, setPapers] = React.useState<Paper[]>([]);
   const [files, setFiles] = React.useState<UploadFile[]>([]);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [loadingPapers, setLoadingPapers] = React.useState(true);
+
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
-  const [isDragging, setIsDragging] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   const totalPapers = papers.length;
+
   const successCount = React.useMemo(
-    () => papers.filter((paper) => paper.status === 'success').length,
+    () => papers.filter((paper) => paper.validation_status === 'SUCCESS').length,
     [papers]
   );
 
-  const today = () => new Date().toISOString().split('T')[0];
+  const fetchPapers = React.useCallback(async () => {
+    try {
+      setLoadingPapers(true);
 
-  const simulateUpload = React.useCallback(async (newFiles: File[]) => {
-    const mappedFiles: UploadFile[] = newFiles.map((file, index) => ({
-      id: Date.now() + index,
-      file,
-      progress: 0,
-      uploaded: false,
-    }));
+      const res = await fetch('/api/list-paper', {
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-    setFiles((prev) => [...mappedFiles, ...prev]);
+      const data = await res.json();
 
-    for (const uploadFile of mappedFiles) {
-      let progress = 0;
-
-      const fakeInterval = setInterval(() => {
-        progress += Math.floor(Math.random() * 15) + 5;
-
-        setFiles((prev) =>
-          prev.map((item) =>
-            item.id === uploadFile.id
-              ? { ...item, progress: Math.min(progress, 90) }
-              : item
-          )
-        );
-      }, 200);
-
-      try {
-        const fd = new FormData();
-        fd.append('file', uploadFile.file);
-        fd.append('exam_id', '1');
-        fd.append('notes', 'upload from web');
-
-        const res = await fetch('/api/upload-paper', {
-          method: 'POST',
-          body: fd,
-        });
-
-        clearInterval(fakeInterval);
-        console.log('res :>> ', res);
-        if (!res.ok) throw new Error('Upload failed');
-
-        const data = await res.json();
-
-        if (!data || data.error) throw new Error('API error');
-
-        setFiles((prev) =>
-          prev.map((item) =>
-            item.id === uploadFile.id
-              ? { ...item, progress: 100, uploaded: true }
-              : item
-          )
-        );
-
-        const extension =
-          uploadFile.file.name.split('.').pop()?.toUpperCase() || 'FILE';
-
-        setPapers((prev) => [
-        {
-          id: uploadFile.id,
-          code: extension,
-          name: uploadFile.file.name,
-          status: 'success',
-          marks: data?.result || 'Done',
-          uploaded: today(),
-        },
-        ...prev,
-      ]);
-
-      } catch (err) {
-        clearInterval(fakeInterval);
-        setFiles((prev) =>
-          prev.map((item) =>
-            item.id === uploadFile.id
-              ? { ...item, progress: 0, uploaded: false }
-              : item
-          )
-        );
-
-        console.error('Upload failed:', err);
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to fetch papers');
       }
+
+      const sorted = Array.isArray(data)
+        ? [...data].sort((a, b) => {
+            const aTime = new Date(a.created_at ?? '').getTime();
+            const bTime = new Date(b.created_at ?? '').getTime();
+            return bTime - aTime;
+          })
+        : [];
+
+      setPapers(sorted);
+    } catch (error) {
+      console.error('fetch papers failed:', error);
+      setPapers([]);
+    } finally {
+      setLoadingPapers(false);
     }
   }, []);
+
+  React.useEffect(() => {
+    fetchPapers();
+  }, [fetchPapers]);
+
+  const simulateUpload = React.useCallback(
+    async (newFiles: File[]) => {
+      const mappedFiles: UploadFile[] = newFiles.map((file, index) => ({
+        id: Date.now() + index,
+        file,
+        progress: 0,
+        uploaded: false,
+      }));
+
+      setFiles((prev) => [...mappedFiles, ...prev]);
+
+      for (const uploadFile of mappedFiles) {
+        let progress = 0;
+
+        const fakeInterval = setInterval(() => {
+          progress += Math.floor(Math.random() * 15) + 5;
+
+          setFiles((prev) =>
+            prev.map((item) =>
+              item.id === uploadFile.id
+                ? { ...item, progress: Math.min(progress, 90) }
+                : item
+            )
+          );
+        }, 200);
+
+        try {
+          const fd = new FormData();
+          fd.append('file', uploadFile.file);
+          fd.append('exam_id', '1');
+          fd.append('notes', 'upload from web');
+
+          const res = await fetch('/api/upload-paper', {
+            method: 'POST',
+            body: fd,
+          });
+
+          clearInterval(fakeInterval);
+
+          const data = await res.json().catch(() => null);
+          console.log('upload response:', data);
+
+          if (!res.ok) {
+            throw new Error(data?.error || 'Upload failed');
+          }
+
+          setFiles((prev) =>
+            prev.map((item) =>
+              item.id === uploadFile.id
+                ? { ...item, progress: 100, uploaded: true }
+                : item
+            )
+          );
+
+          if (data?.paper_id) {
+            localStorage.setItem('currentPaperId', String(data.paper_id));
+          }
+
+          await fetchPapers();
+        } catch (err) {
+          clearInterval(fakeInterval);
+
+          setFiles((prev) =>
+            prev.map((item) =>
+              item.id === uploadFile.id
+                ? { ...item, progress: 0, uploaded: false }
+                : item
+            )
+          );
+
+          console.error('Upload failed:', err);
+        }
+      }
+    },
+    [fetchPapers]
+  );
 
   const handleFiles = React.useCallback(
     (fileList: FileList | null) => {
@@ -177,14 +205,13 @@ export default function AutoGradeUploadPage() {
     setFiles((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleDeletePaper = (id: number) => {
-    setPapers((prev) => prev.filter((paper) => paper.id !== id));
+  const handleDeletePaper = (paperId: number) => {
+    setPapers((prev) => prev.filter((paper) => paper.paper_id !== paperId));
   };
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] px-4 py-8 text-slate-900 md:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-
         <section className="rounded-[24px] bg-transparent p-4 md:p-6">
           <label
             htmlFor="paper-upload"
@@ -238,7 +265,6 @@ export default function AutoGradeUploadPage() {
                 id="paper-upload"
                 ref={inputRef}
                 type="file"
-                
                 accept=".pdf,.doc,.docx"
                 className="hidden"
                 onChange={(e) => handleFiles(e.target.files)}
@@ -268,7 +294,11 @@ export default function AutoGradeUploadPage() {
                       <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
                         <span>{formatFileSize(item.file.size)}</span>
                         <span>•</span>
-                        <span>{item.progress < 100 ? `Uploading ${item.progress}%` : 'Upload complete'}</span>
+                        <span>
+                          {item.progress < 100
+                            ? `Uploading ${item.progress}%`
+                            : 'Upload complete'}
+                        </span>
                       </div>
                     </div>
 
@@ -287,7 +317,7 @@ export default function AutoGradeUploadPage() {
         </section>
 
         <section className="mt-7 overflow-hidden rounded-[24px] border border-slate-200 bg-white">
-          <div className="flex items-center justify-between px-5 py-4 md:px-6 bg-black text-white">
+          <div className="flex items-center justify-between bg-black px-5 py-4 text-white md:px-6">
             <div>
               <h3 className="text-[22px] font-semibold tracking-tight text-white">
                 Your Papers
@@ -307,59 +337,94 @@ export default function AutoGradeUploadPage() {
                   <th className="px-5 py-4 font-medium">Status</th>
                   <th className="px-5 py-4 font-medium">Marks</th>
                   <th className="px-5 py-4 font-medium">Uploaded</th>
-                  <th className="px-5 py-4 text-right font-medium md:px-6">Actions</th>
+                  <th className="px-5 py-4 text-right font-medium md:px-6">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                {papers.map((paper, index) => (
-                  <tr
-                    key={paper.id}
-                    className="animate-[fadeIn_0.28s_ease] border-t border-slate-100 text-slate-700 transition-colors duration-200 hover:bg-slate-50/70"
-                    style={{ animationDelay: `${index * 40}ms` }}
-                  >
-                    <td className="px-5 py-4 md:px-6">
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <FileText className="h-4 w-4" />
-                        <span>{paper.code}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 font-medium text-slate-900">{paper.name}</td>
-                    <td className="px-5 py-4">
-                      {paper.status === 'success' ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Success
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                          <Clock3 className="h-3.5 w-3.5" />
-                          Processing
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">{paper.marks}</td>
-                    <td className="px-5 py-4 text-slate-500">{paper.uploaded}</td>
-                    <td className="px-5 py-4 md:px-6">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-100 active:bg-slate-200"
-                        >
-                          <Eye className="h-4 w-4" />
-                          Open
-                        </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeletePaper(paper.id)}
-                          className="inline-flex items-center justify-center rounded-full p-2 text-slate-400 transition-colors duration-200 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+              <tbody>
+                {loadingPapers ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-8 text-center text-slate-500">
+                      Loading papers...
                     </td>
                   </tr>
-                ))}
+                ) : papers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-8 text-center text-slate-500">
+                      No papers found.
+                    </td>
+                  </tr>
+                ) : (
+                  papers.map((paper, index) => (
+                    <tr
+                      key={paper.paper_id}
+                      className="animate-[fadeIn_0.28s_ease] border-t border-slate-100 text-slate-700 transition-colors duration-200 hover:bg-slate-50/70"
+                      style={{ animationDelay: `${index * 40}ms` }}
+                    >
+                      <td className="px-5 py-4 md:px-6">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <FileText className="h-4 w-4" />
+                          <span>#{paper.paper_id}</span>
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4 font-medium text-slate-900">
+                        Paper {paper.paper_id}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        {paper.validation_status === 'SUCCESS' ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Success
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                            <Clock3 className="h-3.5 w-3.5" />
+                            {paper.validation_status || 'Processing'}
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">{paper.total_marks ?? '-'}</td>
+
+                      <td className="px-5 py-4 text-slate-500">
+                        {paper.created_at
+                          ? new Date(paper.created_at).toLocaleDateString()
+                          : '-'}
+                      </td>
+
+                      <td className="px-5 py-4 md:px-6">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              localStorage.setItem(
+                                'currentPaperId',
+                                String(paper.paper_id)
+                              );
+                              console.log('Selected paper:', paper.paper_id);
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-100 active:bg-slate-200"
+                          >
+                            <Eye className="h-4 w-4" />
+                            Open
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePaper(paper.paper_id)}
+                            className="inline-flex items-center justify-center rounded-full p-2 text-slate-400 transition-colors duration-200 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-100"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

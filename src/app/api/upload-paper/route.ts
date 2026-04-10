@@ -1,47 +1,55 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData()
+    const incomingForm = await req.formData();
 
-    const file = formData.get('file') as File
-    const exam_id = formData.get('exam_id') as string | null
-    const notes = formData.get('notes') as string | null
+    const file = incomingForm.get("file");
+    const exam_id = incomingForm.get("exam_id");
+    const notes = incomingForm.get("notes");
 
-    const cookieStore = await cookies()
-    const token = cookieStore.get('access_token')?.value
-
-    if (!file || !token) {
-      return NextResponse.json({ error: 'Missing file or token' }, { status: 400 })
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
-    // 👉 convert file → base64
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const base64 = buffer.toString('base64')
-    
-    console.log('👉 base64 length:', base64.length)
-    console.log('👉 base64 preview:', base64.slice(0, 100))
-    const res = await fetch(
-      `https://edgenai-api.azure-api.net/api/v2/qh/qh_api_upload_paper?token=${token}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': process.env.EDAI_API_KEY!,
-        },
-        body: JSON.stringify({
-          exam_id: exam_id ? Number(exam_id) : undefined,
-          file: base64,
-          notes: notes || '',
-        }),
-      }
-    )
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
 
-    const data = await res.json()
-    console.log('data :>> ', data);
-    return NextResponse.json(data)
-  } catch (err) {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    if (!token) {
+      return NextResponse.json({ error: "Missing token" }, { status: 400 });
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    if (typeof exam_id === "string") {
+      formData.append("exam_id", exam_id);
+    }
+
+    if (typeof notes === "string") {
+      formData.append("notes", notes);
+    }
+
+    const res = await fetch(
+      `https://edgenai-api.azure-api.net/api/v2/qh/qh_api_upload_paper?token=${encodeURIComponent(token)}`,
+      {
+        method: "POST",
+        headers: {
+          "Ocp-Apim-Subscription-Key": process.env.EDAI_API_KEY ?? "",
+        },
+        body: formData,
+      },
+    );
+
+    const data = await res.json().catch(() => null);
+
+    return NextResponse.json(data ?? { error: "Upload failed" }, {
+      status: res.ok ? 200 : res.status,
+    });
+  } catch {
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

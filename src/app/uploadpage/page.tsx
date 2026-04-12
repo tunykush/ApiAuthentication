@@ -16,6 +16,7 @@ type UploadFile = {
   file: File;
   progress: number;
   uploaded: boolean;
+  error?: string;
 };
 
 type Paper = {
@@ -65,6 +66,37 @@ export default function AutoGradeUploadPage() {
   const [loadingPapers, setLoadingPapers] = React.useState(true);
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = React.useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  const startPolling = React.useCallback(() => {
+    if (pollingRef.current) return;
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch('/api/list-paper', { method: 'GET', cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const sorted = Array.isArray(data)
+          ? [...data].sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
+          : [];
+        setPapers(sorted);
+        const hasPending = sorted.some(
+          (p) => p.validation_status !== 'SUCCESS' && p.validation_status !== 'FAILED'
+        );
+        if (!hasPending) stopPolling();
+      } catch {
+        // ignore polling errors
+      }
+    }, 3000);
+  }, [stopPolling]);
+
+  React.useEffect(() => () => stopPolling(), [stopPolling]);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -158,7 +190,7 @@ export default function AutoGradeUploadPage() {
           console.log('upload response:', data);
 
           if (!res.ok) {
-            throw new Error(data?.error || 'Upload failed');
+            throw new Error(data?.error?.message || 'Upload failed');
           }
 
           setFiles((prev) =>
@@ -174,13 +206,15 @@ export default function AutoGradeUploadPage() {
           }
 
           await fetchPapers();
+          startPolling();
         } catch (err) {
           clearInterval(fakeInterval);
 
+          const message = err instanceof Error ? err.message : 'Upload failed';
           setFiles((prev) =>
             prev.map((item) =>
               item.id === uploadFile.id
-                ? { ...item, progress: 0, uploaded: false }
+                ? { ...item, progress: 0, uploaded: false, error: message }
                 : item
             )
           );
@@ -189,7 +223,7 @@ export default function AutoGradeUploadPage() {
         }
       }
     },
-    [fetchPapers]
+    [fetchPapers, startPolling]
   );
 
   const handleFiles = React.useCallback(
@@ -291,14 +325,18 @@ export default function AutoGradeUploadPage() {
                       <p className="truncate text-sm font-semibold text-slate-900">
                         {item.file.name}
                       </p>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                        <span>{formatFileSize(item.file.size)}</span>
-                        <span>•</span>
-                        <span>
-                          {item.progress < 100
-                            ? `Uploading ${item.progress}%`
-                            : 'Upload complete'}
-                        </span>
+                      <div className="mt-1 flex items-center gap-2 text-xs">
+                        <span className="text-slate-500">{formatFileSize(item.file.size)}</span>
+                        <span className="text-slate-500">•</span>
+                        {item.error ? (
+                          <span className="text-rose-500">{item.error}</span>
+                        ) : (
+                          <span className="text-slate-500">
+                            {item.progress < 100
+                              ? `Uploading ${item.progress}%`
+                              : 'Upload complete'}
+                          </span>
+                        )}
                       </div>
                     </div>
 

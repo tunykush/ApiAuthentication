@@ -1,0 +1,4570 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "edAI FastAPI",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "https://edgenai-api.azure-api.net"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health",
+                "description": "Health",
+                "operationId": "health__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Health  Get",
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/signup/": {
+            "post": {
+                "tags": [
+                    "public"
+                ],
+                "summary": "Signup",
+                "description": "Signup",
+                "operationId": "signup_api_v2_signup__post",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupPayload"
+                            },
+                            "example": {
+                                "username": "string",
+                                "email": "string",
+                                "password": "string",
+                                "institution": {},
+                                "phone": {},
+                                "recaptcha": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/password-reset/": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Password Reset",
+                "description": "Password Reset",
+                "operationId": "password_reset_api_v2_password_reset__post",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            },
+                            "example": {
+                                "email": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/password-reset/confirm/": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Password Reset Confirm",
+                "description": "Password Reset Confirm",
+                "operationId": "password_reset_confirm_api_v2_password_reset_confirm__post",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirm"
+                            },
+                            "example": {
+                                "token": "string",
+                                "new_password": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/token": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Token Obtain",
+                "description": "POST /token: returns access/refresh + user claims.",
+                "operationId": "token_obtain_api_v2_token_post",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "schema": {
+                            "title": "Username",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "schema": {
+                            "title": "Password",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/LoginPayload"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "example": {
+                                "username": "string",
+                                "password": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                },
+                                "example": {
+                                    "access": "string",
+                                    "refresh": "string",
+                                    "username": "string",
+                                    "email": "string",
+                                    "is_superuser": true,
+                                    "must_change_password": true
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/token/refresh": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Token Refresh",
+                "description": "POST /token/refresh: returns new access token if user is active.",
+                "operationId": "token_refresh_api_v2_token_refresh_post",
+                "parameters": [
+                    {
+                        "name": "refresh",
+                        "in": "query",
+                        "schema": {
+                            "title": "Refresh",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/RefreshPayload"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "example": {
+                                "refresh": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenRefresh"
+                                },
+                                "example": {
+                                    "access": "string"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/oauth/providers": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Oauth Providers",
+                "description": "Oauth Providers",
+                "operationId": "oauth_providers_api_v2_oauth_providers_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/oauth/authorize-url": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Oauth Authorize Url",
+                "description": "Oauth Authorize Url",
+                "operationId": "oauth_authorize_url_api_v2_oauth_authorize_url_get",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "title": "Provider",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "redirect_to",
+                        "in": "query",
+                        "schema": {
+                            "title": "Redirect To",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scopes",
+                        "in": "query",
+                        "schema": {
+                            "title": "Scopes",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/oauth/start/{provider}": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Oauth Start",
+                "description": "Oauth Start",
+                "operationId": "oauth_start_api_v2_oauth_start__provider__get",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Provider",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "redirect_to",
+                        "in": "query",
+                        "schema": {
+                            "title": "Redirect To",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scopes",
+                        "in": "query",
+                        "schema": {
+                            "title": "Scopes",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/oauth/supabase/exchange": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Oauth Exchange Supabase Token",
+                "description": "Oauth Exchange Supabase Token",
+                "operationId": "oauth_exchange_supabase_token_api_v2_oauth_supabase_exchange_post",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupabaseExchangePayload"
+                            },
+                            "example": {
+                                "access_token": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                },
+                                "example": {
+                                    "access": "string",
+                                    "refresh": "string",
+                                    "username": "string",
+                                    "email": "string",
+                                    "is_superuser": true,
+                                    "must_change_password": true
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/change-password/": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Change Password",
+                "description": "Change Password",
+                "operationId": "change_password_api_v2_change_password__post",
+                "parameters": [
+                    {
+                        "name": "new_password",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "title": "New Password",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/activity/": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Activity",
+                "description": "Activity",
+                "operationId": "activity_api_v2_activity__post",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/admin/users/create_user": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create User",
+                "description": "Create User",
+                "operationId": "create_user_api_v2_admin_users_create_user_post",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "schema": {
+                            "title": "Username",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "schema": {
+                            "title": "Password",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "schema": {
+                            "title": "Email",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/CreateUserPayload"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "example": {
+                                "username": "string",
+                                "password": "string",
+                                "email": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/admin/users/delete_user": {
+            "delete": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete User",
+                "description": "Delete User",
+                "operationId": "delete_user_api_v2_admin_users_delete_user_delete",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "title": "Username",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/qh_api_upload_paper": {
+            "post": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Upload Paper",
+                "description": "Qh View Upload Paper",
+                "operationId": "qh_view_upload_paper_api_v2_qh_qh_api_upload_paper_post",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "exam_id": {
+                                        "type": "integer",
+                                        "description": "Exam Id",
+                                        "default": 1
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "description": "File",
+                                        "format": "binary"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "Notes"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/list_papers": {
+            "get": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View List Papers",
+                "description": "Qh View List Papers",
+                "operationId": "qh_view_list_papers_api_v2_qh_list_papers_get",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/status": {
+            "get": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Paper Status",
+                "description": "Qh View Paper Status",
+                "operationId": "qh_view_paper_status_api_v2_qh__paper_id__status_get",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "stream",
+                        "in": "query",
+                        "schema": {
+                            "title": "Stream",
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/qh_api_get_master_json": {
+            "get": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Get Master Json",
+                "description": "Qh View Get Master Json",
+                "operationId": "qh_view_get_master_json_api_v2_qh__paper_id__qh_api_get_master_json_get",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/qh_api_add_question": {
+            "post": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Add Question",
+                "description": "Qh View Add Question",
+                "operationId": "qh_view_add_question_api_v2_qh__paper_id__qh_api_add_question_post",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/qh_api_update_master_json": {
+            "put": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Update Master Json",
+                "description": "Qh View Update Master Json",
+                "operationId": "qh_view_update_master_json_api_v2_qh__paper_id__qh_api_update_master_json_pu",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/qh_api_delete": {
+            "delete": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Delete Paper",
+                "description": "Qh View Delete Paper",
+                "operationId": "qh_view_delete_paper_api_v2_qh__paper_id__qh_api_delete_delete",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/qh/{paper_id}/qh_api_finalize": {
+            "post": {
+                "tags": [
+                    "qh"
+                ],
+                "summary": "Qh View Finalize",
+                "description": "Qh View Finalize",
+                "operationId": "qh_view_finalize_api_v2_qh__paper_id__qh_api_finalize_post",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/sh/sh_api_upload_sample_answer": {
+            "post": {
+                "tags": [
+                    "sh"
+                ],
+                "summary": "Sh View Upload Sample Answer",
+                "description": "Sh View Upload Sample Answer",
+                "operationId": "sh_view_upload_sample_answer_api_v2_sh_sh_api_upload_sample_answer_post",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "exam_id": {
+                                        "type": "integer",
+                                        "description": "Exam Id",
+                                        "default": 4
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "description": "File",
+                                        "format": "binary"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "Notes"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/sh/{paper_id}/status": {
+            "get": {
+                "tags": [
+                    "sh"
+                ],
+                "summary": "Sh View Sample Answer Status",
+                "description": "Sh View Sample Answer Status",
+                "operationId": "sh_view_sample_answer_status_api_v2_sh__paper_id__status_get",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/sh/{paper_id}/sh_api_update_master_json": {
+            "put": {
+                "tags": [
+                    "sh"
+                ],
+                "summary": "Sh View Update Master Json",
+                "description": "Sh View Update Master Json",
+                "operationId": "sh_view_update_master_json_api_v2_sh__paper_id__sh_api_update_master_json_pu",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/sh/{paper_id}/sh_api_delete": {
+            "delete": {
+                "tags": [
+                    "sh"
+                ],
+                "summary": "Sh View Delete Sample Answer",
+                "description": "Sh View Delete Sample Answer",
+                "operationId": "sh_view_delete_sample_answer_api_v2_sh__paper_id__sh_api_delete_delete",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/sh/{paper_id}/sh_api_finalize": {
+            "post": {
+                "tags": [
+                    "sh"
+                ],
+                "summary": "Sh View Finalize",
+                "description": "Sh View Finalize",
+                "operationId": "sh_view_finalize_api_v2_sh__paper_id__sh_api_finalize_post",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/rh/{paper_id}/rh_api_create_rubric": {
+            "post": {
+                "tags": [
+                    "rh"
+                ],
+                "summary": "Rh View Create Rubric",
+                "description": "Rh View Create Rubric",
+                "operationId": "rh_view_create_rubric_api_v2_rh__paper_id__rh_api_create_rubric_post",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "correlation_id",
+                        "in": "query",
+                        "schema": {
+                            "title": "Correlation Id",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/rh/{paper_id}/rh_api_status": {
+            "get": {
+                "tags": [
+                    "rh"
+                ],
+                "summary": "Rh View Status",
+                "description": "Rh View Status",
+                "operationId": "rh_view_status_api_v2_rh__paper_id__rh_api_status_get",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "stream",
+                        "in": "query",
+                        "schema": {
+                            "title": "Stream",
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "correlation_id",
+                        "in": "query",
+                        "schema": {
+                            "title": "Correlation Id",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/rh/{paper_id}/rh_api_update_rubric": {
+            "put": {
+                "tags": [
+                    "rh"
+                ],
+                "summary": "Rh View Update Rubric",
+                "description": "Rh View Update Rubric",
+                "operationId": "rh_view_update_rubric_api_v2_rh__paper_id__rh_api_update_rubric_put",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "correlation_id",
+                        "in": "query",
+                        "schema": {
+                            "title": "Correlation Id",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/rh/{paper_id}/rh_api_finalize_rubric": {
+            "post": {
+                "tags": [
+                    "rh"
+                ],
+                "summary": "Rh View Finalize Rubric",
+                "description": "Rh View Finalize Rubric",
+                "operationId": "rh_view_finalize_rubric_api_v2_rh__paper_id__rh_api_finalize_rubric_post",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "correlation_id",
+                        "in": "query",
+                        "schema": {
+                            "title": "Correlation Id",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{paper_id}/ag_api_upload_n_grade": {
+            "post": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Upload Assignment",
+                "description": "Upload assignment answer file and initiate grading.\nArgs:\n    exam_id (int): Exam identifier.\n    paper_id (int): Assignment paper identifier.\n    file (UploadFile): Uploaded answer file.\n    notes (Optional[str], optional): Additional notes. Defaults to None.\n    db (Session, optional): DB session. Defaults to Depends(get_db).\n    user (User, optional): Current user. Defaults to Depends(get_current_user).\nReturns:\n    JSONResponse: Details of the created submission and grading status.",
+                "operationId": "ag_view_upload_assignment_api_v2_ag_paper__paper_id__ag_api_upload_n_grade_p",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "exam_id": {
+                                        "type": "integer",
+                                        "description": "Exam Id",
+                                        "default": 1
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "description": "File",
+                                        "format": "binary"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "Notes"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{paper_id}/submission/ag_api_list_submission": {
+            "get": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View List Submissions",
+                "description": "Ag View List Submissions",
+                "operationId": "ag_view_list_submissions_api_v2_ag_paper__paper_id__submission_ag_api_list_s",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{submission_id}/ag_api_status": {
+            "get": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Grading Status",
+                "description": "Ag View Grading Status",
+                "operationId": "ag_view_grading_status_api_v2_ag_paper__submission_id__ag_api_status_get",
+                "parameters": [
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "stream",
+                        "in": "query",
+                        "schema": {
+                            "title": "Stream",
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{submission_id}/ag_api_get_grading_json": {
+            "get": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Get Grading Json",
+                "description": "Ag View Get Grading Json",
+                "operationId": "ag_view_get_grading_json_api_v2_ag_paper__submission_id__ag_api_get_grading_",
+                "parameters": [
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{paper_id}/submission/{submission_id}/ag_api_apply_review": {
+            "patch": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Apply Review",
+                "description": "Ag View Apply Review",
+                "operationId": "ag_view_apply_review_api_v2_ag_paper__paper_id__submission__submission_id__a",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/paper/{paper_id}/submission/{submission_id}/ag_api_update_submission_meta": {
+            "patch": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Update Submission Meta",
+                "description": "Ag View Update Submission Meta",
+                "operationId": "ag_view_update_submission_meta_api_v2_ag_paper__paper_id__submission__submis",
+                "parameters": [
+                    {
+                        "name": "paper_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Paper Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "title": "Payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/submission/{submission_id}/ag_api_finalize_submission": {
+            "post": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Finalize Grading",
+                "description": "Ag View Finalize Grading",
+                "operationId": "ag_view_finalize_grading_api_v2_ag_submission__submission_id__ag_api_finaliz",
+                "parameters": [
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/submission/{submission_id}/ag_api_delete_submission": {
+            "delete": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Delete Submission",
+                "description": "Ag View Delete Submission",
+                "operationId": "ag_view_delete_submission_api_v2_ag_submission__submission_id__ag_api_delete",
+                "parameters": [
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ag/submission/ag_api_export_grading_json": {
+            "get": {
+                "tags": [
+                    "ag"
+                ],
+                "summary": "Ag View Export Grading Json",
+                "description": "Ag View Export Grading Json",
+                "operationId": "ag_view_export_grading_json_api_v2_ag_submission_ag_api_export_grading_json_",
+                "parameters": [
+                    {
+                        "name": "submission_ids",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "title": "Submission Ids",
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "title": "Token",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "header",
+                        "schema": {
+                            "title": "Host",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "x_institute",
+                        "in": "header",
+                        "schema": {
+                            "title": "X Institute",
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                },
+                                "example": {
+                                    "detail": [
+                                        {
+                                            "loc": [
+                                                {}
+                                            ],
+                                            "msg": "string",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/*": {
+            "get": {
+                "summary": "edai-fastapi_GET",
+                "description": "edai-fastapi_GET",
+                "operationId": "69bd113865effd5c55f9f838",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "summary": "edai-fastapi_POST",
+                "description": "edai-fastapi_POST",
+                "operationId": "69bd1138943f83a457d8cb40",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "summary": "edai-fastapi_PUT",
+                "description": "edai-fastapi_PUT",
+                "operationId": "69bd11383401a5258b04a35f",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "summary": "edai-fastapi_DELETE",
+                "description": "edai-fastapi_DELETE",
+                "operationId": "69bd1138f3d5d6ade194ef1a",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "head": {
+                "summary": "edai-fastapi_HEAD",
+                "description": "edai-fastapi_HEAD",
+                "operationId": "69bd11384f3b3ec4acea923c",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "options": {
+                "summary": "edai-fastapi_OPTIONS",
+                "description": "edai-fastapi_OPTIONS",
+                "operationId": "69bd1138362d9b778a859088",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "summary": "edai-fastapi_PATCH",
+                "description": "edai-fastapi_PATCH",
+                "operationId": "69bd1138004c7fffd7767eb8",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "trace": {
+                "summary": "edai-fastapi_TRACE",
+                "description": "edai-fastapi_TRACE",
+                "operationId": "69bd11384d0facf87aa743fa",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Body_ag_view_upload_assignment_api_v2_ag_paper__paper_id__ag_api_upload_n_grade_post": {
+                "title": "Body_ag_view_upload_assignment_api_v2_ag_paper__paper_id__ag_api_upload_n_grade_post",
+                "required": [
+                    "file"
+                ],
+                "type": "object",
+                "properties": {
+                    "exam_id": {
+                        "title": "Exam Id",
+                        "type": "integer",
+                        "default": 1
+                    },
+                    "file": {
+                        "title": "File",
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "notes": {
+                        "title": "Notes",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                }
+            },
+            "Body_qh_view_upload_paper_api_v2_qh_qh_api_upload_paper_post": {
+                "title": "Body_qh_view_upload_paper_api_v2_qh_qh_api_upload_paper_post",
+                "required": [
+                    "file"
+                ],
+                "type": "object",
+                "properties": {
+                    "exam_id": {
+                        "title": "Exam Id",
+                        "type": "integer",
+                        "default": 1
+                    },
+                    "file": {
+                        "title": "File",
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "notes": {
+                        "title": "Notes",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                }
+            },
+            "Body_sh_view_upload_sample_answer_api_v2_sh_sh_api_upload_sample_answer_post": {
+                "title": "Body_sh_view_upload_sample_answer_api_v2_sh_sh_api_upload_sample_answer_post",
+                "required": [
+                    "file"
+                ],
+                "type": "object",
+                "properties": {
+                    "exam_id": {
+                        "title": "Exam Id",
+                        "type": "integer",
+                        "default": 4
+                    },
+                    "file": {
+                        "title": "File",
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "notes": {
+                        "title": "Notes",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                }
+            },
+            "CreateUserPayload": {
+                "title": "CreateUserPayload",
+                "required": [
+                    "username",
+                    "password",
+                    "email"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string"
+                    },
+                    "email": {
+                        "title": "Email",
+                        "type": "string"
+                    }
+                }
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "LoginPayload": {
+                "title": "LoginPayload",
+                "required": [
+                    "username",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string"
+                    }
+                }
+            },
+            "PasswordResetConfirm": {
+                "title": "PasswordResetConfirm",
+                "required": [
+                    "token",
+                    "new_password"
+                ],
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "title": "Token",
+                        "minLength": 10,
+                        "type": "string"
+                    },
+                    "new_password": {
+                        "title": "New Password",
+                        "minLength": 8,
+                        "type": "string"
+                    }
+                }
+            },
+            "PasswordResetRequest": {
+                "title": "PasswordResetRequest",
+                "required": [
+                    "email"
+                ],
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "title": "Email",
+                        "type": "string",
+                        "format": "email"
+                    }
+                }
+            },
+            "RefreshPayload": {
+                "title": "RefreshPayload",
+                "required": [
+                    "refresh"
+                ],
+                "type": "object",
+                "properties": {
+                    "refresh": {
+                        "title": "Refresh",
+                        "type": "string"
+                    }
+                }
+            },
+            "SignupPayload": {
+                "title": "SignupPayload",
+                "required": [
+                    "username",
+                    "email",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    },
+                    "email": {
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string"
+                    },
+                    "institution": {
+                        "title": "Institution",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "title": "Phone",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "recaptcha": {
+                        "title": "Recaptcha",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                }
+            },
+            "SupabaseExchangePayload": {
+                "title": "SupabaseExchangePayload",
+                "required": [
+                    "access_token"
+                ],
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "title": "Access Token",
+                        "type": "string"
+                    }
+                }
+            },
+            "Token": {
+                "title": "Token",
+                "required": [
+                    "access",
+                    "refresh",
+                    "username",
+                    "email",
+                    "is_superuser",
+                    "must_change_password"
+                ],
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "title": "Access",
+                        "type": "string"
+                    },
+                    "refresh": {
+                        "title": "Refresh",
+                        "type": "string"
+                    },
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    },
+                    "email": {
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "is_superuser": {
+                        "title": "Is Superuser",
+                        "type": "boolean"
+                    },
+                    "must_change_password": {
+                        "title": "Must Change Password",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "TokenRefresh": {
+                "title": "TokenRefresh",
+                "required": [
+                    "access"
+                ],
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "title": "Access",
+                        "type": "string"
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "apiKeyHeader": {
+                "type": "apiKey",
+                "name": "Ocp-Apim-Subscription-Key",
+                "in": "header"
+            },
+            "apiKeyQuery": {
+                "type": "apiKey",
+                "name": "subscription-key",
+                "in": "query"
+            }
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ]
+}

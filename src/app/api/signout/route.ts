@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function POST() {
   const response = NextResponse.json({ message: 'Signed out' })
 
-  response.cookies.set('auth_user_id', '', {
+  response.cookies.set('access_token', '', {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',

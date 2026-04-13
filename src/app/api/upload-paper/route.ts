@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { fetchRetry } from "@/lib/fetchRetry";
 
 export const runtime = "nodejs";
 
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
       formData.append("notes", notes);
     }
 
-    const res = await fetch(
+    const res = await fetchRetry(
       `https://edgenai-api.azure-api.net/api/v2/qh/qh_api_upload_paper?token=${encodeURIComponent(token)}`,
       {
         method: "POST",

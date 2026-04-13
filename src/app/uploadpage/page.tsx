@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Upload,
   X,
@@ -10,6 +11,7 @@ import {
   CheckCircle2,
   Clock3,
 } from 'lucide-react';
+import GradingModal from '@/components/grading/GradingModal';
 
 type UploadFile = {
   id: number;
@@ -60,27 +62,44 @@ function CircleProgress({ progress }: { progress: number }) {
 }
 
 export default function AutoGradeUploadPage() {
+  const router = useRouter();
   const [papers, setPapers] = React.useState<Paper[]>([]);
   const [files, setFiles] = React.useState<UploadFile[]>([]);
   const [isDragging, setIsDragging] = React.useState(false);
   const [loadingPapers, setLoadingPapers] = React.useState(true);
+  const [fileNames, setFileNames] = React.useState<Record<string, string>>({});
+  const [selectedPaper, setSelectedPaper] = React.useState<Paper | null>(null);
+
+  React.useEffect(() => {
+    setFileNames(JSON.parse(localStorage.getItem('paperFileNames') ?? '{}'));
+  }, []);
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPollingRef = React.useRef(false);
 
   const stopPolling = React.useCallback(() => {
+    isPollingRef.current = false;
     if (pollingRef.current) {
-      clearInterval(pollingRef.current);
+      clearTimeout(pollingRef.current);
       pollingRef.current = null;
     }
   }, []);
 
-  const startPolling = React.useCallback(() => {
-    if (pollingRef.current) return;
-    pollingRef.current = setInterval(async () => {
+  const scheduleNextPoll = React.useCallback((delay: number) => {
+    if (!isPollingRef.current) return;
+    pollingRef.current = setTimeout(async () => {
+      if (!isPollingRef.current) return;
       try {
         const res = await fetch('/api/list-paper', { method: 'GET', cache: 'no-store' });
-        if (!res.ok) return;
+        if (res.status === 429) {
+          scheduleNextPoll(Math.min(delay * 2, 60_000));
+          return;
+        }
+        if (!res.ok) {
+          scheduleNextPoll(delay);
+          return;
+        }
         const data = await res.json();
         const sorted = Array.isArray(data)
           ? [...data].sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
@@ -89,14 +108,21 @@ export default function AutoGradeUploadPage() {
         const hasPending = sorted.some(
           (p) => p.validation_status !== 'SUCCESS' && p.validation_status !== 'FAILED'
         );
-        if (!hasPending) stopPolling();
+        if (hasPending) scheduleNextPoll(delay);
+        else stopPolling();
       } catch {
-        // ignore polling errors
+        scheduleNextPoll(delay);
       }
-    }, 3000);
+    }, delay);
   }, [stopPolling]);
 
-  React.useEffect(() => () => stopPolling(), [stopPolling]);
+  const startPolling = React.useCallback(() => {
+    if (isPollingRef.current) return;
+    isPollingRef.current = true;
+    scheduleNextPoll(10_000);
+  }, [scheduleNextPoll]);
+
+  React.useEffect(() => stopPolling, [stopPolling]);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -115,24 +141,46 @@ export default function AutoGradeUploadPage() {
     try {
       setLoadingPapers(true);
 
-      const res = await fetch('/api/list-paper', {
-        method: 'GET',
-        cache: 'no-store',
-      });
+      let res!: Response;
+      let data: unknown = null;
 
-      const data = await res.json();
+      for (let attempt = 0; attempt < 5; attempt++) {
+        res = await fetch('/api/list-paper', { method: 'GET', cache: 'no-store' });
+        data = await res.json().catch(() => null);
 
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to fetch papers');
+        if (res.status === 401) {
+          router.replace('/signin');
+          return;
+        }
+
+        if (res.status !== 429) break;
+
+        const retryMatch = (data as { message?: string })?.message?.match(/(\d+)\s*second/);
+        const retryAfter = retryMatch ? parseInt(retryMatch[1]) * 1000 : 5000;
+        await new Promise((r) => setTimeout(r, retryAfter));
       }
 
-      const sorted = Array.isArray(data)
-        ? [...data].sort((a, b) => {
-            const aTime = new Date(a.created_at ?? '').getTime();
-            const bTime = new Date(b.created_at ?? '').getTime();
-            return bTime - aTime;
-          })
-        : [];
+      if (!res.ok) {
+        const d = data as Record<string, unknown> | null;
+        const msg = d?.error || d?.detail || d?.message || `HTTP ${res.status}`;
+        console.error('fetchPapers failed:', res.status, data);
+        throw new Error(String(msg));
+      }
+
+      const list: Paper[] = Array.isArray(data)
+        ? data
+        : ((data as Record<string, unknown>)?.papers as Paper[] | undefined) ??
+          ((data as Record<string, unknown>)?.results as Paper[] | undefined) ??
+          ((data as Record<string, unknown>)?.data as Paper[] | undefined) ??
+          [];
+
+      console.log('fetchPapers raw data:', data, '→ list:', list);
+
+      const sorted = [...list].sort((a, b) => {
+        const aTime = new Date(a.created_at ?? '').getTime();
+        const bTime = new Date(b.created_at ?? '').getTime();
+        return bTime - aTime;
+      });
 
       setPapers(sorted);
     } catch (error) {
@@ -141,7 +189,7 @@ export default function AutoGradeUploadPage() {
     } finally {
       setLoadingPapers(false);
     }
-  }, []);
+  }, [router]);
 
   React.useEffect(() => {
     fetchPapers();
@@ -179,18 +227,26 @@ export default function AutoGradeUploadPage() {
           fd.append('exam_id', '1');
           fd.append('notes', 'upload from web');
 
-          const res = await fetch('/api/upload-paper', {
-            method: 'POST',
-            body: fd,
-          });
+          let res: Response;
+          let data: Record<string, unknown> | null = null;
+
+          for (let attempt = 0; attempt < 5; attempt++) {
+            res = await fetch('/api/upload-paper', { method: 'POST', body: fd });
+            data = await res.json().catch(() => null);
+
+            if (res.status !== 429) break;
+
+            const retryMatch = (data?.message as string | undefined)?.match(/(\d+)\s*second/);
+            const retryAfter = retryMatch ? parseInt(retryMatch[1]) * 1000 : 5000;
+            await new Promise((r) => setTimeout(r, retryAfter));
+          }
 
           clearInterval(fakeInterval);
 
-          const data = await res.json().catch(() => null);
           console.log('upload response:', data);
 
-          if (!res.ok) {
-            throw new Error(data?.error?.message || 'Upload failed');
+          if (!res!.ok) {
+            throw new Error((data?.error as { message?: string } | null)?.message || data?.message as string || 'Upload failed');
           }
 
           setFiles((prev) =>
@@ -203,6 +259,10 @@ export default function AutoGradeUploadPage() {
 
           if (data?.paper_id) {
             localStorage.setItem('currentPaperId', String(data.paper_id));
+            const stored = JSON.parse(localStorage.getItem('paperFileNames') ?? '{}');
+            stored[String(data.paper_id)] = uploadFile.file.name;
+            localStorage.setItem('paperFileNames', JSON.stringify(stored));
+            setFileNames({ ...stored });
           }
 
           await fetchPapers();
@@ -239,8 +299,27 @@ export default function AutoGradeUploadPage() {
     setFiles((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleDeletePaper = (paperId: number) => {
-    setPapers((prev) => prev.filter((paper) => paper.paper_id !== paperId));
+  const handleDeletePaper = async (paperId: number) => {
+    try {
+      const res = await fetch(`/api/delete-paper?paper_id=${paperId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        console.error("Delete failed:", data);
+        return;
+      }
+
+      setPapers((prev) => prev.filter((paper) => paper.paper_id !== paperId));
+
+      const stored = JSON.parse(localStorage.getItem("paperFileNames") ?? "{}");
+      delete stored[paperId];
+      localStorage.setItem("paperFileNames", JSON.stringify(stored));
+      setFileNames({ ...stored });
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (
@@ -409,7 +488,7 @@ export default function AutoGradeUploadPage() {
                       </td>
 
                       <td className="px-5 py-4 font-medium text-slate-900">
-                        Paper {paper.paper_id}
+                        {fileNames[paper.paper_id] ?? `Paper ${paper.paper_id}`}
                       </td>
 
                       <td className="px-5 py-4">
@@ -438,13 +517,7 @@ export default function AutoGradeUploadPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              localStorage.setItem(
-                                'currentPaperId',
-                                String(paper.paper_id)
-                              );
-                              console.log('Selected paper:', paper.paper_id);
-                            }}
+                            onClick={() => setSelectedPaper(paper)}
                             className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-100 active:bg-slate-200"
                           >
                             <Eye className="h-4 w-4" />
@@ -468,6 +541,14 @@ export default function AutoGradeUploadPage() {
           </div>
         </section>
       </div>
+
+      {selectedPaper && (
+        <GradingModal
+          paper={selectedPaper}
+          paperName={fileNames[selectedPaper.paper_id] ?? `Paper ${selectedPaper.paper_id}`}
+          onClose={() => setSelectedPaper(null)}
+        />
+      )}
     </main>
   );
 }

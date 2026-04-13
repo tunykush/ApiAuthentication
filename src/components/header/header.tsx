@@ -1,55 +1,62 @@
-'use client';
-import React, { useState } from 'react';
-import type { MenuProps } from 'antd';
-import { Menu } from 'antd';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { jwtDecode } from 'jwt-decode';
+import { UserMenu } from './UserMenu';
+import { GraduationCap } from 'lucide-react';
 
-type MenuItem = Required<MenuProps>['items'][number];
+async function getUser(): Promise<{ name: string } | null> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('access_token')?.value;
+    if (!token) return null;
+    const decoded = jwtDecode<{ exp?: number; sub?: string; name?: string; username?: string }>(token);
+    if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) return null;
+    const name = decoded.name ?? decoded.username ?? decoded.sub ?? 'User';
+    return { name };
+  } catch {
+    return null;
+  }
+}
 
-const items: MenuItem[] = [
-  {
-    label: (
-      <Link href="/" rel="noopener noreferrer">
-        Home
-      </Link>
-    ),
-    key: 'Home',
-  },
-  {
-    label: (
-      <Link href="/autograde" rel="noopener noreferrer">
-        Autograde
-      </Link>
-    ),
-    key: 'Autograde',
-  },
-  {
-    label: (
-      <Link href="/consultancy" rel="noopener noreferrer">
-        Consultancy
-      </Link>
-    ),
-    key: 'Consultancy',
-  },
-  {
-    label: (
-      <Link href="/signin" rel="noopener noreferrer">
-        Login
-      </Link>
-    ),
-    key: 'Login',
-  },
-];
+export default async function Header() {
+  const user = await getUser();
 
-const Header: React.FC = () => {
-  const [current, setCurrent] = useState('Home');
+  return (
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:px-8">
+        {/* Logo */}
+        <Link
+          href={user ? '/papers' : '/'}
+          className="flex items-center gap-2 text-slate-900 transition hover:opacity-75"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900">
+            <GraduationCap className="h-4 w-4 text-white" />
+          </div>
+          <span className="text-sm font-bold tracking-tight">Edgen AI</span>
+        </Link>
 
-  const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e);
-    setCurrent(e.key);
-  };
-
-  return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />;
-};
-
-export default Header;
+        {/* Nav */}
+        <nav className="flex items-center gap-4">
+          {user ? (
+            <>
+              <Link
+                href="/papers"
+                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+              >
+                My Papers
+              </Link>
+              <UserMenu name={user.name} />
+            </>
+          ) : (
+            <Link
+              href="/signin"
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Sign in
+            </Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}

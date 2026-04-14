@@ -26,7 +26,7 @@ export default async function Header() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:px-8">
         {/* Logo */}
         <Link
-          href={user ? '/papers' : '/'}
+          href="/"
           className="flex items-center gap-2 text-slate-900 transition hover:opacity-75"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900">

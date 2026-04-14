@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getUserById } from '@/lib/mockdb'
+import { accounts } from '@/components/auth/mockusers'
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const user = getUserById(Number(userId))
+    const user = accounts.find((u) => u.id === Number(userId))
 
     if (!user) {
       return NextResponse.json(

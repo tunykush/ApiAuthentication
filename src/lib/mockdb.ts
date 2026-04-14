@@ -5,3 +5,4 @@ export type User = {
   password: string
   initials: string
 }
+

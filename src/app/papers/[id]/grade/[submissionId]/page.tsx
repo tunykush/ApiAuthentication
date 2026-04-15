@@ -133,8 +133,8 @@ export default function ReviewPage() {
   const totalMax = gradingData?.total_max ?? questions.reduce((a, q) => a + (q.max_marks ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] px-4 py-8 text-slate-900 md:px-8">
-      <div className="mx-auto max-w-3xl space-y-6">
+    <main className="min-h-screen bg-[#f6f7f9] px-6 py-8 text-slate-900 md:px-10">
+      <div className="space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm">
@@ -210,7 +210,7 @@ export default function ReviewPage() {
             <p className="font-medium text-slate-500">No grading data available</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {questions.map((q) => {
               const ov = overrides[q.canonical_question_id];
               const scoreChanged = ov && Number(ov.score) !== q.final_score;

@@ -21,6 +21,8 @@ export async function POST(req: Request) {
   outForm.append('file', file);
   const examId = form.get('exam_id');
   if (typeof examId === 'string') outForm.append('exam_id', examId);
+  const paperId = form.get('paper_id');
+  if (typeof paperId === 'string') outForm.append('paper_id', paperId);
   const notes = form.get('notes');
   if (typeof notes === 'string') outForm.append('notes', notes);
 

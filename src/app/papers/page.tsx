@@ -197,8 +197,8 @@ export default function PapersPage() {
   const successCount = papers.filter((p) => normalizeStatus(p.validation_status) === 'SUCCESS').length;
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] px-4 py-10 text-slate-900 md:px-8">
-      <div className="mx-auto max-w-5xl space-y-8">
+    <main className="min-h-screen bg-[#f6f7f9] px-6 py-8 text-slate-900 md:px-10">
+      <div className="space-y-8">
 
         {/* Page title */}
         <div>
@@ -219,7 +219,7 @@ export default function PapersPage() {
               isDragging ? 'border-slate-400 bg-white' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
                 <Upload className="h-6 w-6 text-slate-500" />
               </div>

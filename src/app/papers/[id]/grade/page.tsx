@@ -202,8 +202,8 @@ export default function GradePage() {
   const successCount = submissions.filter((s) => s.validation_status === 'SUCCESS').length;
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] px-4 py-8 text-slate-900 md:px-8">
-      <div className="mx-auto max-w-4xl space-y-6">
+    <main className="min-h-screen bg-[#f6f7f9] px-6 py-8 text-slate-900 md:px-10">
+      <div className="space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-3">
@@ -233,8 +233,11 @@ export default function GradePage() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Stats + Upload — side by side on wide screens */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_420px]">
+
+        {/* Left: Stats */}
+        <div className="grid grid-cols-3 gap-3 content-start">
           {[
             { label: 'Total', value: submissions.length, color: 'text-slate-900' },
             { label: 'Ready to review', value: successCount, color: 'text-sky-700' },
@@ -247,7 +250,7 @@ export default function GradePage() {
           ))}
         </div>
 
-        {/* Upload zone */}
+        {/* Right: Upload zone */}
         <div>
           <p className="mb-2 text-sm font-semibold text-slate-700">Upload Answer Sheets</p>
           <label
@@ -299,6 +302,7 @@ export default function GradePage() {
             </div>
           )}
         </div>
+        </div>{/* end stats+upload grid */}
 
         {/* Submissions table */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

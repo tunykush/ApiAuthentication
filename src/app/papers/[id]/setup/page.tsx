@@ -60,59 +60,11 @@ export default function SetupPage() {
 
   // ── Rubric ────────────────────────────────────────────────────────────────
   const [rubricStatus, setRubricStatus] = React.useState<string | null>(null);
-  const [rubricChecking, setRubricChecking] = React.useState(true); // true while initial status fetch is in-flight
-  const [rubricJson, setRubricJson] = React.useState('');
-  const [rubricInstruction, setRubricInstruction] = React.useState('');
+  const [rubricChecking, setRubricChecking] = React.useState(true);
   const [rubricCreating, setRubricCreating] = React.useState(false);
-  const [rubricSaving, setRubricSaving] = React.useState(false);
   const [rubricFinalizing, setRubricFinalizing] = React.useState(false);
   const [rubricMsg, setRubricMsg] = React.useState<{ ok: boolean; warn?: boolean; text: string } | null>(null);
   const rubricSseRef = React.useRef<EventSource | null>(null);
-
-  // Strip metadata keys that aren't rubric criteria
-  const META_KEYS = new Set(['paper_id','rubric_status','rubric_version','rubric_round','progress','locked_at','locked_by','status','validation_status','state','task_id','created_at','updated_at']);
-
-  const applyRubricObject = React.useCallback((obj: Record<string, unknown>) => {
-    const { instruction, ...withoutInstruction } = obj;
-    const criteria = Object.fromEntries(Object.entries(withoutInstruction).filter(([k]) => !META_KEYS.has(k)));
-    if (typeof instruction === 'string' && instruction) setRubricInstruction(instruction);
-    if (Object.keys(criteria).length > 0) {
-      const json = JSON.stringify(criteria, null, 2);
-      setRubricJson(json);
-      localStorage.setItem(`rubricJson_${paperId}`, json);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paperId]);
-
-  const applyRubricContent = React.useCallback((d: Record<string, unknown>) => {
-    const rubricContent = d.rubric ?? d.rubric_data ?? d.rubrics ?? d.criteria ?? d.content ?? d.result;
-    if (rubricContent && typeof rubricContent === 'object' && !Array.isArray(rubricContent)) {
-      applyRubricObject(rubricContent as Record<string, unknown>);
-      return true;
-    }
-    return false;
-  }, [applyRubricObject]);
-
-  const loadRubricContent = React.useCallback(async () => {
-    // 1. Try dedicated GET endpoint
-    try {
-      const res = await fetch(`/api/rh/get?paper_id=${paperId}`, { cache: 'no-store' });
-      if (res.ok) {
-        const d = await res.json().catch(() => null);
-        if (d) {
-          const rubricContent = d.rubric ?? d.rubric_data ?? d.rubrics ?? d.criteria ?? d.content ?? d.result ?? d;
-          if (rubricContent && typeof rubricContent === 'object' && !Array.isArray(rubricContent)) {
-            applyRubricObject(rubricContent as Record<string, unknown>);
-            return;
-          }
-        }
-      }
-    } catch { /* ignore */ }
-
-    // 2. Fall back to localStorage cache from a previous SSE session
-    const cached = localStorage.getItem(`rubricJson_${paperId}`);
-    if (cached) setRubricJson(cached);
-  }, [paperId, applyRubricObject]);
 
   const startRubricSSE = React.useCallback(() => {
     rubricSseRef.current?.close();
@@ -124,25 +76,16 @@ export default function SetupPage() {
         const raw = d.status ?? d.validation_status ?? d.rubric_status ?? d.state ?? '';
         const s = normalizeStatus(raw);
         setRubricStatus(s);
-        applyRubricContent(d);
-        if (isTerminal(s)) {
-          es.close(); rubricSseRef.current = null;
-          loadRubricContent(); // fetch content once rubric is done generating
-        }
+        if (isTerminal(s)) { es.close(); rubricSseRef.current = null; }
       } catch { /* ignore */ }
     };
     es.onerror = () => { es.close(); rubricSseRef.current = null; };
-  }, [paperId, applyRubricContent, loadRubricContent]);
+  }, [paperId]);
 
-  // Load existing rubric on mount
+  // Load existing rubric status on mount
   React.useEffect(() => {
     let cancelled = false;
     setRubricChecking(true);
-
-    // Immediately restore from cache so the textarea isn't blank while API loads
-    const cached = localStorage.getItem(`rubricJson_${paperId}`);
-    if (cached) setRubricJson(cached);
-
     (async () => {
       try {
         const res = await fetch(`/api/rh/status?paper_id=${paperId}`, { cache: 'no-store' });
@@ -153,17 +96,10 @@ export default function SetupPage() {
             const raw = d.status ?? d.validation_status ?? d.rubric_status ?? d.state ?? '';
             const s = normalizeStatus(raw);
             if (s) setRubricStatus(s);
-            applyRubricContent(d as Record<string, unknown>);
             if (s && s !== 'FAILED') setPaperFinalized(true);
-            if (isActive(s)) {
-              startRubricSSE();
-            } else if (isTerminal(s) && !cancelled) {
-              // Already done — fetch rubric content separately (will also update cache)
-              loadRubricContent();
-            }
+            if (isActive(s)) startRubricSSE();
           }
         }
-        // If res is not ok (e.g. 404/502 = no rubric yet), rubricStatus stays null → show Create button
       } catch { /* ignore */ }
       finally { if (!cancelled) setRubricChecking(false); }
     })();
@@ -210,40 +146,6 @@ export default function SetupPage() {
     }
   };
 
-  const saveRubric = async () => {
-    setRubricSaving(true);
-    setRubricMsg(null);
-    try {
-      const jsonText = rubricJson.trim();
-      let parsed: Record<string, unknown> = {};
-      if (jsonText) {
-        const p = JSON.parse(jsonText);
-        if (!p || typeof p !== 'object' || Array.isArray(p)) {
-          setRubricMsg({ ok: false, text: 'Rubric JSON must be an object, not an array or primitive.' });
-          return;
-        }
-        parsed = p as Record<string, unknown>;
-      }
-      const instruction = rubricInstruction.trim();
-      if (!jsonText && !instruction) {
-        setRubricMsg({ ok: false, text: 'Please add grading instructions or rubric JSON before saving.' });
-        return;
-      }
-      const rubricPayload = instruction ? { ...parsed, instruction } : parsed;
-      const res = await fetch('/api/rh/update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paper_id: paperId, rubric: rubricPayload }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(extractMsg(data, 'Save failed'));
-      setRubricMsg({ ok: true, text: 'Rubric saved.' });
-    } catch (err) {
-      setRubricMsg({ ok: false, text: err instanceof Error ? err.message : 'Save failed' });
-    } finally {
-      setRubricSaving(false);
-    }
-  };
 
   const finalizeRubric = async () => {
     setRubricFinalizing(true);
@@ -267,56 +169,112 @@ export default function SetupPage() {
 
   // ── Sample Answer ─────────────────────────────────────────────────────────
   const [shPaperId, setShPaperId] = React.useState<number | null>(null);
+  const [shFileName, setShFileName] = React.useState<string | null>(null);
   const [shStatus, setShStatus] = React.useState<string | null>(null);
   const [shUploading, setShUploading] = React.useState(false);
   const [shFinalizing, setShFinalizing] = React.useState(false);
   const [shMsg, setShMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
   const shFileRef = React.useRef<HTMLInputElement | null>(null);
+  // Generation counter — increment to cancel all previous polling loops
+  const shPollGenRef = React.useRef(0);
 
   const pollShStatus = React.useCallback((id: number) => {
+    const gen = ++shPollGenRef.current; // snapshot current generation
     const poll = async () => {
+      if (gen !== shPollGenRef.current) return; // stale — a newer upload started
       try {
         const r = await fetch(`/api/sh/status?paper_id=${id}`, { cache: 'no-store' });
-        if (!r.ok) return;
         const d = await r.json().catch(() => null);
-        const s = normalizeStatus(d?.status ?? d?.validation_status ?? '');
+        if (gen !== shPollGenRef.current) return;
+        if (!r.ok) {
+          if (r.status !== 404) setTimeout(poll, 8_000);
+          return;
+        }
+        const raw =
+          d?.status ??
+          d?.validation_status ??
+          d?.ingestion_status ??
+          d?.sample_status ??
+          d?.state ??
+          '';
+        const s = normalizeStatus(raw);
         if (s) setShStatus(s);
         if (!isTerminal(s)) setTimeout(poll, 6_000);
-      } catch { /* ignore */ }
+      } catch { if (gen === shPollGenRef.current) setTimeout(poll, 8_000); }
     };
     poll();
   }, []);
 
-  // Load persisted sample answer ID and fetch its current status on mount
+  // Load persisted sample answer and fetch current status on mount
   React.useEffect(() => {
-    const stored = localStorage.getItem(`shId_${paperId}`);
-    if (!stored) return;
-    const id = Number(stored);
-    if (!id) return;
-    setShPaperId(id);
-    pollShStatus(id);
+    let cancelled = false;
+
+    // Restore from localStorage immediately so UI doesn't flicker
+    const storedId = localStorage.getItem(`shId_${paperId}`);
+    const storedName = localStorage.getItem(`shName_${paperId}`);
+    if (storedName) setShFileName(storedName);
+
+    (async () => {
+      // 1. Try fetching from API first (recovers state even if localStorage is cleared)
+      try {
+        const res = await fetch(`/api/sh/get?paper_id=${paperId}`, { cache: 'no-store' });
+        if (!cancelled && res.ok) {
+          const d = await res.json().catch(() => null);
+          const raw =
+            d?.status ??
+            d?.validation_status ??
+            d?.ingestion_status ??
+            d?.sample_status ??
+            d?.state ??
+            '';
+          const s = normalizeStatus(raw);
+          const id: number = d?.paper_id ?? d?.sh_id ?? d?.id ?? paperId;
+          if (id && !cancelled) {
+            setShPaperId(id);
+            if (s) setShStatus(s);
+            if (!isTerminal(s)) pollShStatus(id);
+          }
+          return;
+        }
+      } catch { /* fall through to localStorage */ }
+
+      // 2. Fall back to localStorage
+      if (cancelled) return;
+      if (!storedId) return;
+      const id = Number(storedId);
+      if (!id) return;
+      setShPaperId(id);
+      pollShStatus(id);
+    })();
+
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paperId]);
 
   const uploadSampleAnswer = async (file: File) => {
+    // Cancel any in-flight status polling from a previous upload
+    shPollGenRef.current += 1;
     setShUploading(true);
     setShMsg(null);
+    setShStatus(null); // clear stale status so UI resets cleanly
     try {
       const fd = new FormData();
       fd.append('file', file);
       fd.append('exam_id', '1');
       const res = await fetch('/api/sh/upload', { method: 'POST', body: fd });
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || 'Upload failed');
-      const id: number = data?.paper_id ?? data?.sh_id ?? data?.id;
+      if (!res.ok) throw new Error(extractMsg(data, 'Upload failed'));
+      // prefer sh_id (sample answer ID) over paper_id; fall back to paper_id
+      const id: number = data?.sh_id ?? data?.paper_id ?? data?.id ?? paperId;
       if (id) {
         setShPaperId(id);
         setShStatus('PENDING');
-        // Persist so we can reload status on next visit
+        setShFileName(file.name);
         localStorage.setItem(`shId_${paperId}`, String(id));
+        localStorage.setItem(`shName_${paperId}`, file.name);
         setTimeout(() => pollShStatus(id), 3000);
       }
-      setShMsg({ ok: true, text: 'Sample answer uploaded.' });
+      setShMsg({ ok: true, text: 'Sample answer uploaded successfully.' });
     } catch (err) {
       setShMsg({ ok: false, text: err instanceof Error ? err.message : 'Upload failed' });
     } finally {
@@ -481,25 +439,48 @@ export default function SetupPage() {
           </div>
 
           <div className="space-y-3 px-5 py-4">
-            {shStatus !== 'FINALIZED' && (
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
-                <Upload className="h-5 w-5 shrink-0 text-slate-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-800">{shUploading ? 'Uploading…' : 'Click to upload sample answer'}</p>
-                  <p className="text-xs text-slate-500">PDF / DOCX</p>
+            {/* Uploaded file card */}
+            {shFileName && (
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200">
+                  <Upload className="h-4 w-4 text-slate-500" />
                 </div>
-                {shUploading && <Loader2 className="h-4 w-4 animate-spin text-slate-500" />}
-                <input
-                  ref={shFileRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  disabled={shUploading}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSampleAnswer(f); e.target.value = ''; }}
-                />
-              </label>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-slate-800">{shFileName}</p>
+                  <p className="text-xs text-slate-400">
+                    {shStatus === 'FINALIZED' ? 'Finalized' : shStatus === 'SUCCESS' ? 'Ready' : 'Processing…'}
+                  </p>
+                </div>
+                {shStatus === 'FINALIZED' && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
+                {(shStatus === 'PENDING' || shStatus === 'RUNNING') && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-400" />}
+              </div>
             )}
-            {shStatus && shStatus !== 'FINALIZED' && shStatus === 'SUCCESS' && (
+
+            {/* Upload zone — always visible so user can replace even after finalize */}
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
+              <Upload className="h-5 w-5 shrink-0 text-slate-500" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-slate-800">
+                  {shUploading
+                    ? 'Uploading…'
+                    : shFileName
+                    ? 'Replace sample answer'
+                    : 'Click to upload sample answer'}
+                </p>
+                <p className="text-xs text-slate-500">PDF / DOCX</p>
+              </div>
+              {shUploading && <Loader2 className="h-4 w-4 animate-spin text-slate-500" />}
+              <input
+                ref={shFileRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                disabled={shUploading}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSampleAnswer(f); e.target.value = ''; }}
+              />
+            </label>
+
+            {shStatus === 'SUCCESS' && (
               <button
                 type="button"
                 disabled={shFinalizing}
@@ -510,6 +491,7 @@ export default function SetupPage() {
                 Finalize Sample Answer
               </button>
             )}
+
             {shMsg && (
               <p className={`text-sm ${shMsg.ok ? 'text-emerald-600' : 'text-rose-600'}`}>{shMsg.text}</p>
             )}

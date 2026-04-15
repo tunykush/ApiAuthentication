@@ -109,14 +109,20 @@ export default function GradePage() {
     try {
       const res = await fetch(`/api/ag/list-submissions?paper_id=${paperId}`, { cache: 'no-store' });
       const data = await res.json().catch(() => []);
-      const list: Submission[] = Array.isArray(data) ? data : [];
-      const normalized = list.map((s) => ({
+      // Backend may return a raw array OR a wrapper object { submissions: [...] }
+      const raw: Submission[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.submissions) ? data.submissions
+        : Array.isArray(data?.data) ? data.data
+        : Array.isArray(data?.results) ? data.results
+        : [];
+      const normalized = raw.map((s: Submission) => ({
         ...s,
         validation_status: normalizeStatus(s.validation_status),
         student_id: s.student_id && s.student_id !== 'NONE' ? s.student_id : null,
       }));
       setSubmissions(normalized);
-      normalized.forEach((s) => { if (isActive(s.validation_status)) startSSE(s.submission_id); });
+      normalized.forEach((s: Submission) => { if (isActive(s.validation_status)) startSSE(s.submission_id); });
     } catch { setSubmissions([]); }
     finally { setLoadingSubs(false); }
   }, [paperId, startSSE]);

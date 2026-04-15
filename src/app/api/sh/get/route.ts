@@ -14,10 +14,11 @@ export async function GET(request: NextRequest) {
   const token = cookieStore.get('access_token')?.value;
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // Try multiple candidate endpoint names — backend uses sh_api_ prefix convention
+  // Try multiple candidate endpoint names
   const candidates = [
+    'sh_api_get_sample_answer',
+    'sh_api_get',
     'sh_api_status',
-    'sh_api_get_status',
     'status',
   ];
 
@@ -40,10 +41,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (!res) {
-    return NextResponse.json({ error: 'Sample answer status endpoint not found' }, { status: 404 });
+    return NextResponse.json({ error: 'No sample answer found' }, { status: 404 });
   }
 
   const data = await res.json().catch(() => null);
-  console.log(`[sh/status] endpoint=${usedEndpoint} paper_id=${paperId} status=${res.status}`, JSON.stringify(data));
+  console.log(`[sh/get] endpoint=${usedEndpoint} paper_id=${paperId} status=${res.status}`, JSON.stringify(data));
   return NextResponse.json(data ?? {}, { status: res.ok ? 200 : res.status });
 }

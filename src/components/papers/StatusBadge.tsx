@@ -3,9 +3,9 @@ import { CheckCircle2, Clock3, Loader2, Lock, AlertCircle } from 'lucide-react';
 
 export function normalizeStatus(s: string): string {
   const u = (s ?? '').toUpperCase();
-  if (['READY', 'COMPLETED', 'COMPLETE', 'DONE'].includes(u)) return 'SUCCESS';
-  if (['ERROR', 'FAILURE'].includes(u)) return 'FAILED';
-  if (['IN_PROGRESS', 'PROCESSING', 'QUEUED', 'STARTED'].includes(u)) return 'RUNNING';
+  if (['READY', 'COMPLETED', 'COMPLETE', 'DONE', 'INGESTED', 'VALIDATED', 'INDEXED', 'PROCESSED', 'TERMINATE', 'TERMINATED'].includes(u)) return 'SUCCESS';
+  if (['ERROR', 'FAILURE', 'INVALID'].includes(u)) return 'FAILED';
+  if (['IN_PROGRESS', 'PROCESSING', 'QUEUED', 'STARTED', 'UPLOADING', 'INGESTING'].includes(u)) return 'RUNNING';
   return u;
 }
 

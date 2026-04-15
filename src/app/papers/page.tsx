@@ -13,6 +13,7 @@ import {
   Clock3,
   ArrowRight,
   BookOpen,
+  Eye,
 } from 'lucide-react';
 import { Paper } from '@/components/papers/types';
 import { normalizeStatus } from '@/components/papers/StatusBadge';
@@ -45,6 +46,20 @@ export default function PapersPage() {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const pollingRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPollingRef = React.useRef(false);
+  // Map paper_id → blob URL (session-only, cleared on unmount)
+  const paperBlobUrls = React.useRef<Map<number, string>>(new Map());
+
+  React.useEffect(() => {
+    const map = paperBlobUrls.current;
+    return () => { map.forEach((url) => URL.revokeObjectURL(url)); };
+  }, []);
+
+  // Detail drawer state
+  const [detailPaper, setDetailPaper] = React.useState<Paper | null>(null);
+
+  const openDetail = React.useCallback((paper: Paper) => {
+    setDetailPaper(paper);
+  }, []);
 
   React.useEffect(() => {
     setFileNames(JSON.parse(localStorage.getItem('paperFileNames') ?? '{}'));
@@ -142,6 +157,12 @@ export default function PapersPage() {
         setFiles((prev) => prev.map((f) => f.id === uf.id ? { ...f, progress: 100, uploaded: true } : f));
 
         if (data?.paper_id) {
+          const pid = Number(data.paper_id);
+          // Keep blob URL so the drawer can show a PDF preview this session
+          const old = paperBlobUrls.current.get(pid);
+          if (old) URL.revokeObjectURL(old);
+          paperBlobUrls.current.set(pid, URL.createObjectURL(uf.file));
+
           const stored = JSON.parse(localStorage.getItem('paperFileNames') ?? '{}');
           stored[String(data.paper_id)] = uf.file.name;
           localStorage.setItem('paperFileNames', JSON.stringify(stored));
@@ -311,6 +332,14 @@ export default function PapersPage() {
                     <div className="flex shrink-0 items-center gap-2">
                       <button
                         type="button"
+                        onClick={() => openDetail(paper)}
+                        title="View detail"
+                        className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => router.push(`/papers/${paper.paper_id}/setup`)}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                       >
@@ -346,6 +375,93 @@ export default function PapersPage() {
           )}
         </div>
       </div>
+
+      {/* PDF preview modal */}
+      {detailPaper && (() => {
+        const blobUrl = paperBlobUrls.current.get(detailPaper.paper_id) ?? null;
+        const pdfSrc = blobUrl ?? `/api/paper-file?paper_id=${detailPaper.paper_id}`;
+        const isReady = normalizeStatus(detailPaper.validation_status) === 'SUCCESS';
+
+        return (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+              onClick={() => setDetailPaper(null)}
+            />
+
+            {/* Centered modal — 90vw × 92vh */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+              <div className="pointer-events-auto flex w-full max-w-5xl flex-col rounded-2xl bg-white shadow-2xl"
+                style={{ height: 'min(92vh, 900px)' }}>
+
+                {/* Header */}
+                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                      <FileText className="h-4 w-4 text-slate-500" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {fileNames[detailPaper.paper_id] ?? `Paper #${detailPaper.paper_id}`}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <span>#{detailPaper.paper_id}</span>
+                        {detailPaper.created_at && (
+                          <><span>·</span><span>{new Date(detailPaper.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span></>
+                        )}
+                        {detailPaper.total_marks != null && (
+                          <><span>·</span><span>{detailPaper.total_marks} marks</span></>
+                        )}
+                        <span>·</span>
+                        {isReady
+                          ? <span className="font-medium text-emerald-600">Ready</span>
+                          : <span className="font-medium text-amber-500">Processing</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDetailPaper(null)}
+                    className="ml-4 shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* PDF — fills remaining space */}
+                <iframe
+                  src={pdfSrc}
+                  className="min-h-0 flex-1 w-full rounded-none border-0"
+                  title="Paper PDF preview"
+                />
+
+                {/* Footer */}
+                <div className="flex shrink-0 items-center gap-2 border-t border-slate-100 px-5 py-3.5">
+                <button
+                  type="button"
+                  onClick={() => { setDetailPaper(null); router.push(`/papers/${detailPaper.paper_id}/setup`); }}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  <Settings className="h-3.5 w-3.5" /> Setup
+                </button>
+                <button
+                  type="button"
+                  disabled={!isReady}
+                  onClick={() => { setDetailPaper(null); router.push(`/papers/${detailPaper.paper_id}/grade`); }}
+                  className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium shadow-sm transition ${
+                    isReady ? 'bg-slate-900 text-white hover:bg-slate-700' : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  <GraduationCap className="h-3.5 w-3.5" /> Grade
+                </button>
+              </div>
+            </div>{/* modal box */}
+            </div>{/* centering container */}
+          </>
+        );
+      })()}
     </main>
   );
 }

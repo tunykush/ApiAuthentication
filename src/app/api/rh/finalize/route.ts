@@ -14,17 +14,21 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body?.paper_id) return NextResponse.json({ error: 'Missing paper_id' }, { status: 400 });
 
+  // Backend (FastAPI/Pydantic) requires a JSON body — sending paper_id as payload
   const res = await fetchRetry(
     `${BASE}/rh/${body.paper_id}/rh_api_finalize_rubric?token=${encodeURIComponent(token)}`,
     {
       method: 'POST',
       headers: {
         'Ocp-Apim-Subscription-Key': process.env.EDAI_API_KEY ?? '',
+        'Content-Type': 'application/json',
         Accept: 'application/json',
       },
+      body: JSON.stringify({ paper_id: Number(body.paper_id) }),
     }
   );
 
   const data = await res.json().catch(() => null);
+  console.log(`[rh/finalize] paper_id=${body.paper_id} status=${res.status}`, JSON.stringify(data));
   return NextResponse.json(data ?? {}, { status: res.ok ? 200 : res.status });
 }

@@ -37,6 +37,18 @@ export default async function Header() {
 
         {/* Nav */}
         <nav className="flex items-center gap-4">
+          <Link
+            href="/about"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            About
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Contact
+          </Link>
           {user ? (
             <>
               <Link
